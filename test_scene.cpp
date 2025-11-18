@@ -67,4 +67,5 @@ TestScene::TestScene() {
 
     _tile_size = 50;
     _chunk_size = 10;
+    _view_radius = 2;
 }

@@ -23,6 +23,7 @@ protected:
 
     int _tile_size;
     int _chunk_size;
+    int _view_radius;
 
     HashMap<String, int> _test_keys;
 };
