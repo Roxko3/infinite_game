@@ -15,9 +15,12 @@ public:
 
     Chunk(int x, int y, int chunk_size);
 
+    Chunk() : _x(0), _y(0) {}
+
     virtual void set(int x, int y, int type);
     virtual int get(int x, int y);
     virtual int index(int x, int y) const;
+    virtual void generate();
 };
 
 #endif
