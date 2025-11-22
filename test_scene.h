@@ -25,11 +25,18 @@ protected:
 
     Ref<Image> _grass_image;
     Ref<Image> _wall_image;
+    Ref<Image> _player_image;
     Ref<Texture> _grass_texture;
     Ref<Texture> _wall_texture;
+    Ref<Texture> _player_texture;
 
     Vector2 _player_pos;
     float _player_speed;
+
+    bool up;
+    bool down;
+    bool right;
+    bool left;
 
     int _tile_size;
     int _chunk_size;

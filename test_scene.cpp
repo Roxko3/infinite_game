@@ -10,22 +10,47 @@ void TestScene::input_event(const Ref<InputEvent> &event){
     Ref<InputEventKey> iek = event;
 
       if(iek.is_valid()) {
-        if(!iek->is_pressed())
+        if(iek->is_echo())
             return;
 
-        if(iek->get_physical_scancode() == KEY_W)
-            _player_pos.y -= _player_speed;
-        if(iek->get_physical_scancode() == KEY_S)
-            _player_pos.y += _player_speed;
-        if(iek->get_physical_scancode() == KEY_A)
-            _player_pos.x -= _player_speed;
-        if(iek->get_physical_scancode() == KEY_D)
-            _player_pos.x += _player_speed;
+        /*if(!iek->is_pressed())
+            return;*/
+
+        uint32_t scancode = iek->get_physical_scancode();
+        bool pressed = iek->is_pressed();
+
+        if(scancode == KEY_W){
+            up = pressed;
+        }
+        else if(scancode == KEY_S){
+            down = pressed;
+        }
+        else if(scancode == KEY_A){
+            left = pressed;
+        }
+        else if(scancode == KEY_D){
+            right = pressed;
+        }
+
+        return;
     }
 
 }
 void TestScene::update(float delta){
     _manage_threads();
+
+    if(up){
+        _player_pos.y -= _player_speed * delta;
+    }
+    else if(down){
+        _player_pos.y += _player_speed * delta;
+    }
+    else if(right){
+        _player_pos.x += _player_speed * delta;
+    }
+    else if(left){
+        _player_pos.x -= _player_speed * delta;
+    }
 
     int player_chunk_x = floor(_player_pos.x / (_tile_size * _chunk_size));
     int player_chunk_y = floor(_player_pos.y / (_tile_size * _chunk_size));
@@ -78,11 +103,8 @@ void TestScene::render(){
     }
 
 
-    r->draw_rect(Rect2(_player_pos.x - 1, _player_pos.y - 1, 50, 50), Color(0, 0, 0));
+    r->draw_texture(_player_texture ,Rect2(_player_pos.x - 1, _player_pos.y - 1, 50, 50));
 
-    //r->draw_texture(_grass_texture, Rect2(400, 400, 100, 100));
-    //r->draw_texture(_wall_texture, Rect2(600, 600, 100, 100));
-    //r->draw_texture_clipped(_texture, Rect2(32, 32, 16, 16), Rect2(400, 600, 100, 100));
     r->draw_text_2d("Points: ", _font, Vector2(5,5), Color(1,0,0));
 }
 
@@ -128,14 +150,23 @@ TestScene::TestScene() {
     _grass_image->load_from_file("grass.png");
     _wall_image.instance();
     _wall_image->load_from_file("wall.png");
+    _player_image.instance();
+    _player_image->load_from_file("player.png");
 
     _grass_texture.instance();
     _grass_texture->create_from_image(_grass_image);
     _wall_texture.instance();
     _wall_texture->create_from_image(_wall_image);
+    _player_texture.instance();
+    _player_texture->create_from_image(_player_image);
 
     _player_pos = Vector2(100, 100);
-    _player_speed = 50;
+    _player_speed = 100;
+
+    up = false;
+    down = false;
+    right = false;
+    left = false;
 
     _tile_size = 50;
     _chunk_size = 5;
