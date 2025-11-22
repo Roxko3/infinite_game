@@ -1,5 +1,11 @@
 #include "test_scene.h"
 
+void thread_func(void *p_user_data) {
+    Chunk *c = reinterpret_cast<Chunk*>(p_user_data);
+    c->generate();
+    c->_is_ready.set();
+}
+
 void TestScene::input_event(const Ref<InputEvent> &event){
     Ref<InputEventKey> iek = event;
 
@@ -19,6 +25,8 @@ void TestScene::input_event(const Ref<InputEvent> &event){
 
 }
 void TestScene::update(float delta){
+    _manage_threads();
+
     int player_chunk_x = floor(_player_pos.x / (_tile_size * _chunk_size));
     int player_chunk_y = floor(_player_pos.y / (_tile_size * _chunk_size));
 
@@ -50,7 +58,10 @@ void TestScene::render(){
             if (!_chunks.has(key))
                 continue;
 
-            Chunk& c = _chunks[key];
+            Chunk& c = *_chunks[key];
+
+            if (!c._is_ready.is_set())
+                continue;
 
             int world_x = cx * _chunk_size * _tile_size;
             int world_y = cy * _chunk_size * _tile_size;
@@ -83,8 +94,28 @@ void TestScene::ensure_chunk(int cx, int cy) {
     String key = make_key(cx, cy);
 
     if (!_chunks.has(key)) {
-        Chunk c(cx, cy, _chunk_size);
+        Chunk *c = memnew(Chunk(cx, cy, _chunk_size));
         _chunks[key] = c;
+
+        Thread *t = memnew(Thread);
+        t->start(thread_func, c);
+
+        ThreadData td;
+        td.c=c;
+        td.t=t;
+
+        _threads.push_back(td);
+
+    }
+}
+
+void TestScene::_manage_threads() {
+    for (int i = _threads.size() - 1; i >= 0; i--) {
+        if (_threads[i].c->_is_ready.is_set()) {
+            _threads[i].t->wait_to_finish();
+            memdelete(_threads[i].t);
+            _threads.remove(i);
+        }
     }
 }
 

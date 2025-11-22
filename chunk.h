@@ -10,6 +10,7 @@ class Chunk{
 public:
     int _x;
     int _y;
+    SafeFlag _is_ready;
 
     Vector<int> _tiles;
 

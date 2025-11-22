@@ -15,6 +15,12 @@ public:
 	TestScene();
 
 protected:
+    struct ThreadData {
+        Chunk* c;
+        Thread* t;
+    };
+    Vector<ThreadData> _threads;
+
     Ref<Font> _font;
 
     Ref<Image> _grass_image;
@@ -29,9 +35,10 @@ protected:
     int _chunk_size;
     int _view_radius;
 
-    HashMap<String, Chunk> _chunks;
+    HashMap<String, Chunk*> _chunks;
 
     void ensure_chunk(int cx, int cy);
+    void _manage_threads();
     String make_key(int cx, int cy);
 
 };
