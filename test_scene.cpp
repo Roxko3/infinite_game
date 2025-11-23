@@ -69,6 +69,11 @@ void TestScene::render(){
     r->clear_screen(Color(1, 1, 1));
     r->camera_2d_projection_set_to_window();
 
+    Vector2 cam(
+    r->get_window_size().width * 0.5f - _player_pos.x,
+    r->get_window_size().height * 0.5f - _player_pos.y
+);
+
     int player_chunk_x = floor(_player_pos.x / (_tile_size * _chunk_size));
     int player_chunk_y = floor(_player_pos.y / (_tile_size * _chunk_size));
 
@@ -96,14 +101,13 @@ void TestScene::render(){
 
                     int tile = c.get(x,y);
 
-                    r->draw_texture((tile==0) ? _grass_texture : _wall_texture, Rect2(world_x + x*_tile_size, world_y + y*_tile_size, _tile_size, _tile_size));
+                    r->draw_texture((tile==0) ? _grass_texture : _wall_texture, Rect2(cam.x + world_x + x * _tile_size, cam.y + world_y + y * _tile_size, _tile_size, _tile_size));
                 }
             }
         }
     }
 
-
-    r->draw_texture(_player_texture ,Rect2(_player_pos.x - 1, _player_pos.y - 1, 50, 50));
+    r->draw_texture(_player_texture,Rect2(cam.x + _player_pos.x - 25,cam.y + _player_pos.y - 25,50,50));
 
     r->draw_text_2d("Points: ", _font, Vector2(5,5), Color(1,0,0));
 }
@@ -161,7 +165,8 @@ TestScene::TestScene() {
     _player_texture->create_from_image(_player_image);
 
     _player_pos = Vector2(100, 100);
-    _player_speed = 100;
+    _player_speed = 200;
+
 
     up = false;
     down = false;
