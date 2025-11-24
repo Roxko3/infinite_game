@@ -38,6 +38,7 @@ protected:
     bool right;
     bool left;
 
+    int _player_size;
     int _tile_size;
     int _chunk_size;
     int _view_radius;
@@ -47,6 +48,7 @@ protected:
     void ensure_chunk(int cx, int cy);
     void _manage_threads();
     String make_key(int cx, int cy);
+    bool is_solid_tile(float world_x, float world_y);
 
 };
 

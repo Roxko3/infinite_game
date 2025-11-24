@@ -50,11 +50,28 @@ void TestScene::update(float delta){
         direction.normalize();
     }
 
-    _player_pos += direction * _player_speed * delta;
+    Vector2 next = _player_pos + direction * _player_speed * delta;
+
+    float half = _player_size * 0.5f;
+
+    float tl_x = next.x - half;
+    float tl_y = next.y - half;
+    float tr_x = next.x + half;
+    float tr_y = next.y - half;
+
+    float bl_x = next.x - half;
+    float bl_y = next.y + half;
+    float br_x = next.x + half;
+    float br_y = next.y + half;
+
+    bool blocked = is_solid_tile(tl_x, tl_y) || is_solid_tile(tr_x, tr_y) || is_solid_tile(bl_x, bl_y) || is_solid_tile(br_x, br_y);
+
+    if(!blocked) {
+        _player_pos = next;
+    }
 
     int player_chunk_x = floor(_player_pos.x / (_tile_size * _chunk_size));
     int player_chunk_y = floor(_player_pos.y / (_tile_size * _chunk_size));
-
 
     for (int y = -_view_radius; y <= _view_radius; y++) {
         for (int x = -_view_radius; x <= _view_radius; x++) {
@@ -120,7 +137,7 @@ void TestScene::ensure_chunk(int cx, int cy) {
     String key = make_key(cx, cy);
 
     if (!_chunks.has(key)) {
-        Chunk *c = memnew(Chunk(cx, cy, _chunk_size));
+        Chunk *c = memnew(Chunk(cx, cy));
         _chunks[key] = c;
 
         Thread *t = memnew(Thread);
@@ -145,6 +162,28 @@ void TestScene::_manage_threads() {
     }
 }
 
+bool TestScene::is_solid_tile(float world_x, float world_y) {
+    int tile_x = (int)floor(world_x / _tile_size);
+    int tile_y = (int)floor(world_y / _tile_size);
+
+    int cx = (int)floor((float)tile_x / _chunk_size);
+    int cy = (int)floor((float)tile_y / _chunk_size);
+
+    String key = make_key(cx, cy);
+
+    if(!_chunks.has(key))
+        return true; // ha nem letezik, akkor falkent kezeli
+
+    Chunk *c = _chunks[key];
+    if(!c->_is_ready.is_set())
+        return true;
+
+    int local_x = tile_x - cx * _chunk_size;
+    int local_y = tile_y - cy * _chunk_size;
+
+    int tile = c->get(local_x, local_y);
+    return tile == 1;
+}
 
 TestScene::TestScene() {
     _font.instance();
@@ -175,7 +214,9 @@ TestScene::TestScene() {
 
     _tile_size = 50;
     _chunk_size = 5;
-    _view_radius = 1;
+    Chunk::CHUNK_SIZE = _chunk_size;
+    _view_radius = 5;
+    _player_size = (int)_tile_size * 0.85f;
 
     ensure_chunk(0, 0);
 }
