@@ -39,18 +39,18 @@ void TestScene::input_event(const Ref<InputEvent> &event){
 void TestScene::update(float delta){
     _manage_threads();
 
-    if(up){
-        _player_pos.y -= _player_speed * delta;
+    Vector2 direction = Vector2(0, 0);
+
+    if (up)    direction.y -= 1;
+    if (down)  direction.y += 1;
+    if (right) direction.x += 1;
+    if (left)  direction.x -= 1;
+
+    if (direction != Vector2(0, 0)) {
+        direction.normalize();
     }
-    else if(down){
-        _player_pos.y += _player_speed * delta;
-    }
-    else if(right){
-        _player_pos.x += _player_speed * delta;
-    }
-    else if(left){
-        _player_pos.x -= _player_speed * delta;
-    }
+
+    _player_pos += direction * _player_speed * delta;
 
     int player_chunk_x = floor(_player_pos.x / (_tile_size * _chunk_size));
     int player_chunk_y = floor(_player_pos.y / (_tile_size * _chunk_size));
