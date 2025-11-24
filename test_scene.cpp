@@ -78,6 +78,8 @@ void TestScene::update(float delta){
         _player_pos.y = try_y.y;
     }
 
+    check_diamond_pickup();
+
     int player_chunk_x = floor(_player_pos.x / (_tile_size * _chunk_size));
     int player_chunk_y = floor(_player_pos.y / (_tile_size * _chunk_size));
 
@@ -126,7 +128,22 @@ void TestScene::render(){
 
                     int tile = c.get(x,y);
 
-                    r->draw_texture((tile==0) ? _grass_texture : _wall_texture, Rect2(cam.x + world_x + x * _tile_size, cam.y + world_y + y * _tile_size, _tile_size, _tile_size));
+                    switch(tile) {
+                case 0:
+                        r->draw_texture(_grass_texture, Rect2(cam.x + world_x + x * _tile_size, cam.y + world_y + y * _tile_size, _tile_size, _tile_size));
+                    break;
+                case 1:
+                    r->draw_texture(_wall_texture, Rect2(cam.x + world_x + x * _tile_size, cam.y + world_y + y * _tile_size, _tile_size, _tile_size));
+                    break;
+                case 2:
+                        r->draw_texture(_grass_texture, Rect2(cam.x + world_x + x * _tile_size, cam.y + world_y + y * _tile_size, _tile_size, _tile_size));
+                        r->draw_texture(_diamond_texture, Rect2(cam.x + world_x + x * _tile_size, cam.y + world_y + y * _tile_size, _tile_size, _tile_size));
+                    break;
+                default:
+                        r->draw_texture(_grass_texture, Rect2(cam.x + world_x + x * _tile_size, cam.y + world_y + y * _tile_size, _tile_size, _tile_size));
+                    break;
+                    }
+
                 }
             }
         }
@@ -134,8 +151,7 @@ void TestScene::render(){
 
     float half = _player_size * 0.5f;
     r->draw_texture(_player_texture,Rect2(cam.x + _player_pos.x - half,cam.y + _player_pos.y - half,_player_size,_player_size));
-
-    r->draw_text_2d("Points: ", _font, Vector2(5,5), Color(1,0,0));
+    r->draw_text_2d("Points: " + String::num(_points), _font, Vector2(5,5), Color(1,0,0));
 }
 
 String TestScene::make_key(int cx, int cy) {
@@ -194,6 +210,33 @@ bool TestScene::is_solid_tile(float world_x, float world_y) {
     return tile == 1;
 }
 
+void TestScene::check_diamond_pickup() {
+    int tile_x = (int)floor(_player_pos.x / _tile_size);
+    int tile_y = (int)floor(_player_pos.y / _tile_size);
+
+    int cx = (int)floor((float)tile_x / _chunk_size);
+    int cy = (int)floor((float)tile_y / _chunk_size);
+
+    String key = make_key(cx, cy);
+
+    if(!_chunks.has(key))
+        return;
+
+    Chunk *c = _chunks[key];
+    if(!c->_is_ready.is_set())
+        return;
+
+    int local_x = tile_x - cx * _chunk_size;
+    int local_y = tile_y - cy * _chunk_size;
+
+    int tile = c->get(local_x, local_y);
+
+    if(tile == 2) {
+        c->set(local_x, local_y, 0);
+        _points++;
+    }
+}
+
 TestScene::TestScene() {
     Math::randomize();
 
@@ -212,6 +255,8 @@ TestScene::TestScene() {
     _grass_image->load_from_file("grass.png");
     _wall_image.instance();
     _wall_image->load_from_file("wall.png");
+    _diamond_image.instance();
+    _diamond_image->load_from_file("diamond.png");
     _player_image.instance();
     _player_image->load_from_file("player.png");
 
@@ -219,11 +264,14 @@ TestScene::TestScene() {
     _grass_texture->create_from_image(_grass_image);
     _wall_texture.instance();
     _wall_texture->create_from_image(_wall_image);
+    _diamond_texture.instance();
+    _diamond_texture->create_from_image(_diamond_image);
     _player_texture.instance();
     _player_texture->create_from_image(_player_image);
 
     _player_pos = Vector2(100, 100);
     _player_speed = 200;
+    _points = 0;
 
 
     up = false;

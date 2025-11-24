@@ -25,9 +25,11 @@ protected:
 
     Ref<Image> _grass_image;
     Ref<Image> _wall_image;
+    Ref<Image> _diamond_image;
     Ref<Image> _player_image;
     Ref<Texture> _grass_texture;
     Ref<Texture> _wall_texture;
+    Ref<Texture> _diamond_texture;
     Ref<Texture> _player_texture;
 
     Vector2 _player_pos;
@@ -43,12 +45,15 @@ protected:
     int _chunk_size;
     int _view_radius;
 
+    int _points;
+
     HashMap<String, Chunk*> _chunks;
 
     void ensure_chunk(int cx, int cy);
     void _manage_threads();
     String make_key(int cx, int cy);
     bool is_solid_tile(float world_x, float world_y);
+    void check_diamond_pickup();
 
 };
 

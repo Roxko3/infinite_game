@@ -5,6 +5,7 @@
 
 //grass = 0
 //wall = 1
+// diamond = 2
 class Chunk{
 
 public:

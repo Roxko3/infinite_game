@@ -17,8 +17,15 @@ int Chunk::index(int x, int y) const {
 void Chunk::generate() {
     for (int y = 0; y < CHUNK_SIZE; y++) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
-            int tile = Math::random(0,8);
-            set(x, y, tile < 8 ? 0 : 1);
+            int tile = Math::random(0,99);
+            if(tile < 90)
+                _tiles.set(index(x, y), 0);
+
+            else if(tile < 99)
+                _tiles.set(index(x, y), 1);
+
+            else
+                _tiles.set(index(x, y), 2);
         }
     }
 }
