@@ -50,24 +50,32 @@ void TestScene::update(float delta){
         direction.normalize();
     }
 
-    Vector2 next = _player_pos + direction * _player_speed * delta;
+    Vector2 desired = direction * _player_speed * delta;
+
+    Vector2 try_x = _player_pos + Vector2(desired.x, 0);
 
     float half = _player_size * 0.5f;
 
-    float tl_x = next.x - half;
-    float tl_y = next.y - half;
-    float tr_x = next.x + half;
-    float tr_y = next.y - half;
+    bool blocked_x =
+        is_solid_tile(try_x.x - half, _player_pos.y - half) ||
+        is_solid_tile(try_x.x + half, _player_pos.y - half) ||
+        is_solid_tile(try_x.x - half, _player_pos.y + half) ||
+        is_solid_tile(try_x.x + half, _player_pos.y + half);
 
-    float bl_x = next.x - half;
-    float bl_y = next.y + half;
-    float br_x = next.x + half;
-    float br_y = next.y + half;
+    if(!blocked_x) {
+        _player_pos.x = try_x.x;
+    }
 
-    bool blocked = is_solid_tile(tl_x, tl_y) || is_solid_tile(tr_x, tr_y) || is_solid_tile(bl_x, bl_y) || is_solid_tile(br_x, br_y);
+    Vector2 try_y = _player_pos + Vector2(0, desired.y);
 
-    if(!blocked) {
-        _player_pos = next;
+    bool blocked_y =
+        is_solid_tile(_player_pos.x - half, try_y.y - half) ||
+        is_solid_tile(_player_pos.x + half, try_y.y - half) ||
+        is_solid_tile(_player_pos.x - half, try_y.y + half) ||
+        is_solid_tile(_player_pos.x + half, try_y.y + half);
+
+    if(!blocked_y) {
+        _player_pos.y = try_y.y;
     }
 
     int player_chunk_x = floor(_player_pos.x / (_tile_size * _chunk_size));
@@ -124,7 +132,8 @@ void TestScene::render(){
         }
     }
 
-    r->draw_texture(_player_texture,Rect2(cam.x + _player_pos.x - 25,cam.y + _player_pos.y - 25,50,50));
+    float half = _player_size * 0.5f;
+    r->draw_texture(_player_texture,Rect2(cam.x + _player_pos.x - half,cam.y + _player_pos.y - half,_player_size,_player_size));
 
     r->draw_text_2d("Points: ", _font, Vector2(5,5), Color(1,0,0));
 }
@@ -186,6 +195,16 @@ bool TestScene::is_solid_tile(float world_x, float world_y) {
 }
 
 TestScene::TestScene() {
+    Math::randomize();
+
+    _tile_size = 75;
+    _chunk_size = 8;
+    Chunk::CHUNK_SIZE = _chunk_size;
+    _view_radius = 2;
+    _player_size = (int)(_tile_size * 0.85f);
+
+    ensure_chunk(0, 0);
+
     _font.instance();
     _font->load_default(31.5);
 
@@ -212,11 +231,5 @@ TestScene::TestScene() {
     right = false;
     left = false;
 
-    _tile_size = 50;
-    _chunk_size = 5;
-    Chunk::CHUNK_SIZE = _chunk_size;
-    _view_radius = 5;
-    _player_size = (int)_tile_size * 0.85f;
 
-    ensure_chunk(0, 0);
 }
