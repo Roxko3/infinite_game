@@ -152,6 +152,25 @@ void TestScene::render(){
     float half = _player_size * 0.5f;
     r->draw_texture(_player_texture,Rect2(cam.x + _player_pos.x - half,cam.y + _player_pos.y - half,_player_size,_player_size));
     r->draw_text_2d("Points: " + String::num(_points), _font, Vector2(5,5), Color(1,0,0));
+
+    GUI::new_frame();
+    ImGui::Begin("Menu");
+    if (ImGui::Button("Restart")) {
+        _scoreboard.push_back(_points);
+        _scoreboard.sort();
+        _scoreboard.invert();
+        _points = 0;
+        Math::randomize();
+        _player_pos = Vector2(100, 100);
+        _chunks.clear();
+    }
+    ImGui::Text("Scoreboard");
+    ImGui::BeginChild("Scrolling");
+    for (int i = 0; i < _scoreboard.size(); i++)
+        ImGui::Text("%d. %d", i+1, _scoreboard[i]);
+    ImGui::EndChild();
+    ImGui::End();
+    GUI::render();
 }
 
 String TestScene::make_key(int cx, int cy) {

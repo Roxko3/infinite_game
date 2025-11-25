@@ -55,6 +55,7 @@ protected:
     bool is_solid_tile(float world_x, float world_y);
     void check_diamond_pickup();
 
+    List<int> _scoreboard;
 };
 
 #endif // TEST_SCENE_H
