@@ -259,7 +259,7 @@ void TestScene::check_diamond_pickup() {
 TestScene::TestScene() {
     Math::randomize();
 
-    _tile_size = 75;
+    _tile_size = 100;
     _chunk_size = 8;
     Chunk::CHUNK_SIZE = _chunk_size;
     _view_radius = 2;
@@ -267,8 +267,9 @@ TestScene::TestScene() {
 
     ensure_chunk(0, 0);
 
+    float scale = AppWindow::get_singleton()->dpi().x;
     _font.instance();
-    _font->load_default(31.5);
+    _font->load_default(31.5 * scale);
 
     _grass_image.instance();
     _grass_image->load_from_file("grass.png");
@@ -298,5 +299,7 @@ TestScene::TestScene() {
     right = false;
     left = false;
 
+    ImGui::GetStyle().ScaleAllSizes(scale);
+    ImGui::GetIO().FontGlobalScale = scale;
 
 }
